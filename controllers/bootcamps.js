@@ -1,37 +1,21 @@
+const path=require("path")
 const Bootcamp=require("../models/Bootcamp")
 const geocoder=require("../utils/geocoder")
 const ErrorResponse=require("../utils/errorResponse")
 const asyncHandler=require("../middleware/async")
+const advancedResults = require("../middleware/advancedResults")
 
 //@desc     get all bootcamps
 //@route    GET /api/v1/bootcamps
-//@access    Public
+//@access   Public
 exports.getBootcamps=asyncHandler(async(req,res,next)=>{
-    let query;
-    // copy req.query
-    const reqQuery={...req.query}
-
-    //create query String
-    let queryStr=JSON.stringify(reqQuery)
-
-    // below line will insert $ prefix in gt|gte|lt|lte|in
-    queryStr=queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g,match=>`$${match}`)
-
-    //Finding resource
-    query=Bootcamp.find(JSON.parse(queryStr))
-
-    //Executing our resource
-    const bootcamps = await query
-    res.status(200).json({
-        success: true,
-        count: bootcamps.length,
-        data:bootcamps
-    })
+   
+    res.status(200).json(res.advancedResults)
 })
 
-//@desc     get a single bootcamps
+//@desc     get a single bootcamp
 //@route    Get /api/v1/bootcamps/:id
-//@access    Public
+//@access   Public
 exports.getBootcamp=asyncHandler(async(req,res,next)=>{
         const bootcamp= await Bootcamp.findOne({_id:req.params.id})
 
@@ -47,7 +31,7 @@ exports.getBootcamp=asyncHandler(async(req,res,next)=>{
 
 //@desc     Create a bootcamp
 //@route    POST /api/v1/bootcamps/:id
-//@access    Public
+//@access   Private
 exports.createBootcamp=asyncHandler(async(req,res,next)=>{
     
         const bootcamp=await Bootcamp.create(req.body)
@@ -57,9 +41,9 @@ exports.createBootcamp=asyncHandler(async(req,res,next)=>{
         })   
 })
 
-//@desc     update a single bootcamps
+//@desc     update a single bootcamp
 //@route    PUT /api/v1/bootcamps/:id
-//@access    Public
+//@access   Private
 exports.updateBootcamp=asyncHandler(async(req,res,next)=>{
    
         const bootcamp= await Bootcamp.findByIdAndUpdate(req.params.id,req.body,{
@@ -76,17 +60,19 @@ exports.updateBootcamp=asyncHandler(async(req,res,next)=>{
      
 })
 
-//@desc     get a single bootcamps
+//@desc     delete a single bootcamp
 //@route    DELETE /api/v1/bootcamps/:id
-//@access    Public
+//@access   Private
 exports.deleteBootcamp=asyncHandler(async(req,res,next)=>{
   
-        const bootcamp= await Bootcamp.findByIdAndDelete(req.params.id)
+        const bootcamp= await Bootcamp.findById(req.params.id)
 
         if(!bootcamp){
             return  next(new ErrorResponse(`BootCamp not found with id of ${req.params.id}`,404))
         }
 
+        bootcamp.remove()   // we use remove method to use the proper functioning of middleware
+                            // mentioned in bootcamp model
         res.status(200).json({
             success: true,
             data:{}
@@ -96,8 +82,7 @@ exports.deleteBootcamp=asyncHandler(async(req,res,next)=>{
 
 //@desc     Get bootcamps within a radius
 //@route    GET /api/v1/bootcamps/radius/:zipcode/:distance
-//@access    Private
-
+//@access   Private
 exports.getBootcampsInRadius=asyncHandler(async(req,res,next)=>{
     const {zipcode, distance}=req.params
 
@@ -120,4 +105,52 @@ exports.getBootcampsInRadius=asyncHandler(async(req,res,next)=>{
         count:bootcamps.length,
         data:bootcamps
     })
+})
+
+//@desc    upload a Photo for a Bootcamp
+//@route    PUT /api/v1/bootcamps/:id/photo
+//@access    Private
+exports.bootcampPhotoUpload=asyncHandler(async(req,res,next)=>{
+  
+    const bootcamp= await Bootcamp.findById(req.params.id)
+
+    if(!bootcamp){
+        return  next(new ErrorResponse(`BootCamp not found with id of ${req.params.id}`,404))
+    }
+
+   
+    if(!req.files){
+        return  next(new ErrorResponse(`Please Upload A file`,400))
+    }
+
+    const file=req.files.file
+
+    // Make Sure the Image is Photo
+    if(!file.mimetype.startsWith("image")){
+        return  next(new ErrorResponse(`Please Upload a image file`,400))
+    }
+
+    // check filesize
+    if(file.size>process.env.MAX_FILE_UPLOAD){
+        return next(new ErrorResponse(`Please Upload a Image less than ${process.env.MAX_FILE_UPLOADS}`,400))
+    }
+
+    // create custom filename
+    file.name=`photo_${bootcamp._id}${path.parse(file.name).ext}`
+    
+
+    file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`,async err=>{
+        if(err){
+            console.log(err)
+            return next(new ErrorResponse(`Problem With file upload`,500))
+        }
+
+        await Bootcamp.findByIdAndUpdate(req.params.id,{photo:file.name})
+
+        res.status(200).json({
+            sucess:true,
+            data:file.name
+        })
+    })
+ 
 })
