@@ -1,78 +1,86 @@
-const mongoose = require("mongoose")
+const mongoose = require('mongoose');
 
-const CourseSchema=new mongoose.Schema({
-    title:{
-        type:String,
-        trim:true,
-        required:[true,'Please Add a Course Title']
-    },
-    description:{
-        type:String,
-        required:[true,'Please Add a Course Description']
-    },
-    weeks:{
-        type:String,
-        required:[true,'Please Add Number of weeks']
-    },
-    tuition:{
-        type:Number,
-        required:[true,'Please Add a tuition cost']
-    },
-    minimumSkill:{
-        type:String,
-        required:[true,'Please Add a minimum skill'],
-        enum:['beginner','intermediate','advanced']
-    },
-    scholarshipAvailable:{
-        type:Boolean,
-        deafult:false
-    },
-    createdAt:{
-        type:Date,
-        default:Date.now()
-    },
-    bootcamp:{
-        type:mongoose.Schema.ObjectId,
-        ref:'Bootcamp',
-        required:true
-    }
-})
+const CourseSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    trim: true,
+    required: [true, 'Please add a course title']
+  },
+  description: {
+    type: String,
+    required: [true, 'Please add a description']
+  },
+  weeks: {
+    type: String,
+    required: [true, 'Please add number of weeks']
+  },
+  tuition: {
+    type: Number,
+    required: [true, 'Please add a tuition cost']
+  },
+  minimumSkill: {
+    type: String,
+    required: [true, 'Please add a minimum skill'],
+    enum: ['beginner', 'intermediate', 'advanced']
+  },
+  scholarshipAvailable: {
+    type: Boolean,
+    default: false
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  bootcamp: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Bootcamp',
+    required: true
+  },
+  user: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    required: true
+  }
+});
 
-// Static method to get average of course tuitions
-
-// static method directly get applied on the schema and pull out all the values from DB
-CourseSchema.statics.getAverageCost=async function(bootcampId){
-// console.log('Calculating Avg Cost..'.blue)
-
-const obj=await this.aggregate([
+// Static method to get avg of course tuitions
+CourseSchema.statics.getAverageCost = async function(bootcampId) {
+  const obj = await this.aggregate([
     {
-        $match:{ bootcamp:bootcampId}
+      $match: { bootcamp: bootcampId }
     },
     {
-        $group:{
-            _id:'$bootcampId',
-            averageCost:{$avg:'$tuition'}
-        }
+      $group: {
+        _id: '$bootcamp',
+        averageCost: { $avg: '$tuition' }
+      }
     }
-])
-try {
-    await this.model('Bootcamp').findByIdAndUpdate(bootcampId,{
-        averageCost:Math.ceil(obj[0].averageCost/10)*10
-    })
-} catch (error) {
-    console.log(error)
-}
-}
+  ]);
 
-// call Average cost after save
+  try {
+ if (obj[0]) {
+      await this.model("Bootcamp").findByIdAndUpdate(bootcampId, {
+        averageCost:Math.ceil(obj[0].averageCost / 10) * 10,
+      });
+    } else {
+      await this.model("Bootcamp").findByIdAndUpdate(bootcampId, {
+        averageCost: undefined,
+      });
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
 
-CourseSchema.post('save',function(){
-this.constructor.getAverageCost(this.bootcamp)
-})
+// Call getAverageCost after save
+CourseSchema.post('save', async function() {
+  await this.constructor.getAverageCost(this.bootcamp);
+});
 
-// call Average cost before remove
-CourseSchema.pre('save',function(){
-    this.constructor.getAverageCost(this.bootcamp)
-})
+// Call getAverageCost after remove
+CourseSchema.post('remove', async function () {
+  await this.constructor.getAverageCost(this.bootcamp);
+});
 
-module.exports=mongoose.model('Course',CourseSchema,'courses')
+
+module.exports = mongoose.model('Course', CourseSchema);
