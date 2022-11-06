@@ -1,0 +1,598 @@
+openapi: 3.0.0
+info:
+  title: DevCamper API
+  description: >-
+    Backend API for Devcamper application to manage bootcamps. courses, reviews,
+    users and authentication
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+    noauthAuth:
+      type: http
+      scheme: noauth
+tags:
+  - name: Bootcamps
+    description: Bootcamps CRUD Functionality
+  - name: Courses
+    description: Create Read Update and Delete Courses
+  - name: Authentication
+    description: >-
+      Routes for User authentication including register, login, reset password
+      etc.
+  - name: Users
+    description: CRUD functionality for users only avaliable to Admins
+  - name: Reviews
+    description: Manage Course reviews
+paths:
+  /api/v1/bootcamps:
+    get:
+      tags:
+        - Bootcamps
+      summary: Get All Bootcamps
+      description: >-
+        Fetch all the Bootcamps form Database, includes filtering and pagination
+        etc.
+      parameters:
+        - name: select
+          in: query
+          schema:
+            type: string
+          example: name,description,housing
+        - name: sort
+          in: query
+          schema:
+            type: string
+          example: name
+        - name: page
+          in: query
+          schema:
+            type: integer
+          example: '2'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          example: '2'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    post:
+      tags:
+        - Bootcamps
+      summary: Create New Bootcamp
+      description: >-
+        Add new Bootcamp to Database, Must be authenticated and publisher or
+        admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: Codemastercsd
+                description: >-
+                  Is coding your passion? Codemasters will give you the skills
+                  and the tools to become the best developer possible. We
+                  specialize in full stack web development and data science
+                website: https://codemasterss.com
+                phone: (333) 333-3333
+                email: enroll@codemasters.com
+                address: 85 South Prospect Street Burlington VT 05405
+                careers:
+                  - Web Development
+                  - Data Science
+                  - Business
+                housing: false
+                jobAssistance: false
+                jobGuarantee: false
+                acceptGi: false
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/bootcamps/634f7ec9771853324f1390a2:
+    get:
+      tags:
+        - Bootcamps
+      summary: Get Single Bootcamp
+      description: Get Single Bootcamp By ID
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    put:
+      tags:
+        - Bootcamps
+      summary: Update Bootcamp
+      description: Update Single Bootcamp by Id in Database
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                housing: false
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          description: JSON Type
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/bootcamps/63610a39307fcbd5f9ed88bc:
+    delete:
+      tags:
+        - Bootcamps
+      summary: Delete Bootcamp
+      description: Delete Bootcamp from Database
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/bootcamps/radius/02118/30:
+    get:
+      tags:
+        - Bootcamps
+      summary: Get Bootcamps By Distance
+      description: get bootcamps within a radius of specific zipcode
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/bootcamps/5d713995b721c3bb38c1f5d0/photo:
+    put:
+      tags:
+        - Bootcamps
+      summary: Upload Photo
+      description: Upload a photo for Bootcamp
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                '':
+                  type: string
+                  format: binary
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          description: JSON Type
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/courses:
+    get:
+      tags:
+        - Courses
+      summary: Get All Courses
+      description: Get All courses
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/bootcamps/5d713995b721c3bb38c1f5d0/courses:
+    get:
+      tags:
+        - Courses
+      summary: Get Courses For BootCamp
+      description: Get Specific Courses for a BootCamp
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/courses/5d725a4a7b292f5f8ceff789:
+    get:
+      tags:
+        - Courses
+      summary: Get Single Course
+      description: Get a Single course by its ID
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/bootcamps/5d725a037b292f5f8ceff787/courses:
+    post:
+      tags:
+        - Courses
+      summary: Create Course
+      description: Create A specific bootcamp course
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                title: Data Science Program w
+                description: >-
+                  In this course you will learn Python for data science, machine
+                  learning and big data tools
+                weeks: 10
+                tuition: 30000
+                minimumSkill: intermediate
+                scholarhipsAvailable: false
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          description: JSON Type
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/courses/5d725c84c4ded7bcb480eaa0:
+    put:
+      tags:
+        - Courses
+      summary: Update Course
+      description: Update Course in database
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\r\n    \"tuition\":13000,\r\n   
+                \"minimumSkill\":\"advanced\"\r\n}"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          description: JSON Type
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - Courses
+      summary: Delete Course
+      description: Remove a Course From database
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          description: JSON Type
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register User
+      description: Add User to database with encrypted password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: pk
+                email: h@email.com
+                password: '1233444'
+                role: publisher
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          description: JSON Type
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login User
+      description: >-
+        Update Logged in User password, send in body current password and new
+        password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: assh@email.com
+                password: '1233444'
+      security:
+        - noauthAuth: []
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          description: JSON Type
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get Logged In User via Token
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          description: JSON Type
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/auth/updatedetails:
+    put:
+      tags:
+        - Authentication
+      summary: Update User details
+      description: Update Logged in user email, name
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: john1@gmail.com
+                name: John Doe
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/auth/updatepassword:
+    put:
+      tags:
+        - Authentication
+      summary: Update User Password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                currentPassword: '123456'
+                newPassword: '1234567'
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/users/:
+    get:
+      tags:
+        - Users
+      summary: Get All Users
+      description: Get all users (admin)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    post:
+      tags:
+        - Users
+      summary: Create User
+      description: Add user to database (admin)
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\r\n    \"name\": \"Ashwani Kumar\",\r\n    \"email\":
+                \"ashwani@gmail.com\",\r\n    \"password\":\"123456\"\r\n}"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          description: JSON Type
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/users/5d7a514b5d2c12c7449be043:
+    get:
+      tags:
+        - Users
+      summary: Get Single User
+      description: Get single user by id (admin)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    put:
+      tags:
+        - Users
+      summary: Update User
+      description: Update a user in database (admin)
+      requestBody:
+        content: {}
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - Users
+      summary: Delete User
+      description: Delete User from database (admin)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/reviews:
+    get:
+      tags:
+        - Reviews
+      summary: Get All Reviews
+      description: Get All reviews and populate with bootcamp name and description
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/reviews/5d7a514b5d2c12c7449be023:
+    get:
+      tags:
+        - Reviews
+      summary: Get Single Review
+      description: >-
+        Fetch a review from database by id and populate bootcamp name and
+        description
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - Reviews
+      summary: Delete Review
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/bootcamps/5d725a1b7b292f5f8ceff788/reviews:
+    get:
+      tags:
+        - Reviews
+      summary: Get Reviews for Bootcamp
+      description: Fetch the reviews for a specific bootcamp
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    post:
+      tags:
+        - Reviews
+      summary: Add Review For Bootcamp
+      description: Insert a review for a specific bootcamp
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                title: Noce Bootcamp
+                text: I learnt a lot
+                rating: 8
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          description: JSON Type
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/reviews/5d7a514b5d2c12c7449be027:
+    put:
+      tags:
+        - Reviews
+      summary: Update Review
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '"{\r\n    \"title\":\"had fun\"\r\n}"'
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          description: JSON Type
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
