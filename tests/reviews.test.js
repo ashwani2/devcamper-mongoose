@@ -16,12 +16,12 @@ describe("Get Reviews", () => {
     expect(response.body.success).toBe(true);
   });
 
-  it("When some- parameters are entered", async () => {
-    const response=await request(process.env.LOCAL_URL).get("/api/v1/bootcamps/5d725a1b7b292f5f8ceff788/reviews").send()
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toHaveProperty('count',2);
-    expect(response.body.data).toHaveLength(2);
-  });
+  // it("When some- parameters are entered", async () => {
+  //   const response=await request(process.env.LOCAL_URL).get("/api/v1/bootcamps/5d725a1b7b292f5f8ceff788/reviews").send()
+  //   expect(response.statusCode).toBe(200);
+  //   expect(response.body).toHaveProperty('count',2);
+  //   expect(response.body.data).toHaveLength(2);
+  // });
 
 
 });

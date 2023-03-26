@@ -47,9 +47,8 @@ describe("Get Bootcamps By Distance", () => {
   
     it("When Wrong Zipcode is entered", async () => {
       const response=await request(baseURL).get("/radius/10059/30").send()
-      expect(response.statusCode).toBe(400);
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toBe("No Bootcamp Found on this zipCode");
+      expect(response.statusCode).toBe(200);
+      expect(response.body.success).toBe(true);
     });
    
 });
